@@ -7,4 +7,8 @@ app.use(cors())
 
 app.use(express.json())
 
+import userRouter from "./routes/user.routes"
+
+app.use("/api/v1/users", userRouter)
+
 export { app }
