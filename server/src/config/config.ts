@@ -1,5 +1,4 @@
 import dotenv from "dotenv"
-import { ApiError } from "../utils/ApiError";
 
 dotenv.config()
 

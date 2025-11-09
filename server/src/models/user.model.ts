@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema<IUser>({
     },
     avatar: {
         type: String,
-        default: null
+        default: "http://res.cloudinary.com/ds551q6ll/image/upload/v1762703561/pa5ab4quollc181cksoc.webp"
         // default: Add cloudinary url of something default
     },
     unlockedTitles: [

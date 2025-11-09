@@ -87,7 +87,7 @@ const loginUser = asyncHandler(async (req: AuthRequest, res: Response) => {
 
     const { username, email, password } = req.body
 
-    if (!username && !email) {
+    if (!(username || email)) {
         throw new ApiError(400, "Username or email is required")
     }
 
@@ -196,7 +196,7 @@ const refreshAccessToken = asyncHandler(async (req: AuthRequest, res: Response) 
     }
 })
 
-const changeCurrentPassword = asyncHandler(async (req, res) => {
+const changeCurrentPassword = asyncHandler(async (req: AuthRequest, res: Response) => {
     // get old and currentPassword -> hash old password and check from db -> if fine hash current password and update in db 
     const { oldPassword, newPassword } = req.body
 
@@ -221,17 +221,22 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, req.user, "Current user fetched successfully"))
 })
 
-const updateAccountDetails = asyncHandler(async (req, res) => {
-    const { fullName, email } = req.body
+const updateAccountDetails = asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { fullname, email } = req.body
 
-    if (!fullName || !email) {
-        throw new ApiError(400, "All fields are required")
+    if (!fullname?.trim() && !email?.trim()) {
+        throw new ApiError(400, "At least one field is required to update");
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser && (existingUser._id as any).toString() !== req.user?._id?.toString()) {
+        throw new ApiError(409, "Email already in use by another account");
     }
 
     const user = await User.findByIdAndUpdate(req.user?._id,
         {
             $set: {
-                fullName,
+                fullname,
                 email
             }
         },
@@ -241,28 +246,28 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, user, "Account details updated succesfully"))
 })
 
-const updateUserAvatar = asyncHandler(async (req, res) => {
+const updateUserAvatar = asyncHandler(async (req: AuthRequest, res: Response) => {
     const avatarLocalPath = req.file?.path
 
-    if (!avatarLocalPath){
+    if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar file is missing")
     }
 
     const response = await uploadOnCloudinary(avatarLocalPath)
 
-    if (!response?.url){
+    if (!response?.url) {
         throw new ApiError(500, "Error uploading on cloudinary")
     }
 
     const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
-            $set : {
-                avatar : response.url
+            $set: {
+                avatar: response.url
             }
         },
         {
-            new : true
+            new: true
         }
     ).select("-password -refreshToken")
 
