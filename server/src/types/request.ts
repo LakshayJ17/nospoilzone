@@ -1,5 +1,5 @@
 import { Request } from "express";
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 
 export interface IUnlockedTitle {
     id: number | null;
@@ -9,6 +9,7 @@ export interface IUnlockedTitle {
 }
 
 export interface IUser extends Document {
+    id : Types.ObjectId;
     username: string;
     fullname: string;
     email: string;
@@ -18,8 +19,12 @@ export interface IUser extends Document {
     refreshToken?: string;
     createdAt?: Date;
     updatedAt?: Date;
+
+    isPasswordCorrect(password: string): Promise<boolean>;
+    generateAccessToken(): string;
+    generateRefreshToken(): string;
 }
 
 export interface AuthRequest extends Request {
-    user?: IUser
+    user?: IUser;
 }

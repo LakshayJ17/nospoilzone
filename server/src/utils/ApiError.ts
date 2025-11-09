@@ -2,7 +2,7 @@ class ApiError extends Error {
     statusCode: number;
     errors: string[];
     success: boolean;
-    data: unknown;
+    data: any;
 
     constructor(
         statusCode: number,
